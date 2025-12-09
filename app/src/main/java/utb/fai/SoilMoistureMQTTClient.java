@@ -4,6 +4,7 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import utb.fai.API.HumiditySensor;
 import utb.fai.API.IrrigationSystem;
 import utb.fai.Types.FaultType;
@@ -166,9 +167,11 @@ public class SoilMoistureMQTTClient {
         publishOut(String.format("%s;%s", Config.RESPONSE_FAULT, faultType));
     }
 
-    private void publishOut(String payload) {
+   private void publishOut(String payload) {
+        var mqttMessage = new MqttMessage(payload.getBytes());
+        mqttMessage.setQos(1);
         try {
-            client.publish(Config.TOPIC_OUT, payload.getBytes(StandardCharsets.UTF_8), 0, false);
+            client.publish(Config.TOPIC_OUT, mqttMessage);
         } catch (MqttException e) {
             System.err.println("Failed to publish MQTT message: " + e.getMessage());
         }
